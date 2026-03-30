@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From Plate to Planet: The Hidden Cost of Food Waste</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-dark: #1D3E0A;
+    --green-mid: #3B6D11;
+    --green-light: #639922;
+    --green-pale: #EAF3DE;
+    --green-subtle: #F2F8EC;
+    --amber: #854F0B;
+    --amber-pale: #FAEEDA;
+    --red: #A32D2D;
+    --red-pale: #FCEBEB;
+    --text: #222;
+    --text-mid: #444;
+    --text-muted: #666;
+    --border: #ddd;
+    --bg: #fff;
+    --bg-soft: #f7f9f4;
+    --card-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-soft);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: linear-gradient(135deg, #1D3E0A 0%, #3B6D11 60%, #639922 100%);
+    color: #fff;
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+  }
+  .site-header .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #A8D68A;
+    margin-bottom: 0.6rem;
+  }
+  .site-header h1 {
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.6rem;
+  }
+  .site-header .subtitle {
+    font-size: 1rem;
+    color: #C8E6B0;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── Nav ── */
+  .tab-nav {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    background: #fff;
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 1rem 1.4rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+    margin-bottom: -2px;
+  }
+  .tab-btn:hover { color: var(--green-light); }
+  .tab-btn.active { color: var(--green-mid); border-bottom-color: var(--green-mid); }
+
+  /* ── Layout ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .section-header { margin-bottom: 2rem; }
+  .section-header h2 { font-size: 1.5rem; font-weight: 700; color: var(--green-dark); margin-bottom: 0.3rem; }
+  .section-header p { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* ── Stat cards ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+  .stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.4rem 1.2rem;
+    box-shadow: var(--card-shadow);
+    border-top: 4px solid var(--green-light);
+    text-align: center;
+  }
+  .stat-card .value { font-size: 2.2rem; font-weight: 800; color: var(--green-mid); line-height: 1; margin-bottom: 0.4rem; }
+  .stat-card .label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+  .stat-card .note { font-size: 0.75rem; color: #999; }
+
+  /* ── Bar chart ── */
+  .chart-section { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: var(--card-shadow); }
+  .chart-section h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 1.2rem; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .bar-label { font-size: 0.78rem; color: var(--text-mid); width: 130px; flex-shrink: 0; text-align: right; }
+  .bar-track { flex: 1; height: 22px; background: var(--bg-soft); border-radius: 4px; overflow: hidden; }
+  .bar-fill {
+    height: 100%; border-radius: 4px;
+    display: flex; align-items: center; justify-content: flex-end; padding-right: 7px;
+    transition: width 1s cubic-bezier(.4,0,.2,1);
+  }
+  .bar-pct { font-size: 0.72rem; font-weight: 700; color: #fff; }
+
+  /* ── Timeline ── */
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before { content: ''; position: absolute; left: 9px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .tl-item { position: relative; margin-bottom: 1.6rem; }
+  .tl-dot {
+    position: absolute; left: -1.88rem; top: 4px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--border);
+    transition: border-color .2s;
+  }
+  .tl-dot.highlight { border-color: var(--green-light); background: var(--green-light); }
+  .tl-head { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .tl-body { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+  .pill {
+    display: inline-block; font-size: 0.68rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px;
+    letter-spacing: 0.03em;
+  }
+  .pill-green { background: var(--green-pale); color: var(--green-mid); }
+  .pill-amber { background: var(--amber-pale); color: var(--amber); }
+  .pill-red   { background: var(--red-pale);   color: var(--red); }
+
+  /* ── Impact cards ── */
+  .impact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .impact-card {
+    background: #fff; border-radius: 12px; padding: 1.3rem 1.2rem;
+    box-shadow: var(--card-shadow);
+    border-left: 4px solid var(--green-light);
+    transition: transform .15s;
+  }
+  .impact-card:hover { transform: translateY(-2px); }
+  .impact-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+  .impact-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+  .impact-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* ── Calculator ── */
+  .calc-wrap { background: #fff; border-radius: 12px; padding: 2rem; box-shadow: var(--card-shadow); }
+  .calc-row { display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; flex-wrap: wrap; }
+  .calc-label { font-size: 0.85rem; color: var(--text-muted); width: 180px; flex-shrink: 0; }
+  input[type=range] {
+    flex: 1; min-width: 160px; height: 6px; border-radius: 3px;
+    -webkit-appearance: none; background: var(--border); cursor: pointer; outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px;
+    border-radius: 50%; background: var(--green-mid); cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  }
+  .calc-val { font-size: 0.85rem; font-weight: 700; color: var(--green-mid); min-width: 72px; text-align: right; }
+  .result-box {
+    background: var(--green-pale); border-radius: 12px; padding: 1.5rem 1.4rem; margin-top: 1.5rem;
+    border: 1.5px solid #C0DD97;
+  }
+  .result-box h3 { font-size: 0.85rem; font-weight: 700; color: var(--green-dark); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .result-metric { background: #fff; border-radius: 8px; padding: 0.9rem 1rem; }
+  .result-metric .rm-label { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
+  .result-metric .rm-value { font-size: 1.4rem; font-weight: 800; color: var(--green-mid); }
+  .result-metric .rm-unit  { font-size: 0.72rem; color: var(--text-muted); }
+  .result-note { font-size: 0.72rem; color: var(--green-mid); margin-top: 0.8rem; }
+
+  /* ── Quiz ── */
+  .quiz-wrap { background: #fff; border-radius: 12px; padding: 2rem; box-shadow: var(--card-shadow); max-width: 680px; margin: 0 auto; }
+  .quiz-progress { display: flex; gap: 6px; margin-bottom: 1.5rem; }
+  .qp-dot { height: 6px; flex: 1; border-radius: 3px; background: var(--border); transition: background .3s; }
+  .qp-dot.done { background: var(--green-light); }
+  .qp-dot.current { background: var(--green-mid); }
+  .quiz-q { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 1.2rem; line-height: 1.5; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.2rem; }
+  .quiz-opt {
+    padding: 0.8rem 1rem; border: 1.5px solid var(--border);
+    border-radius: 8px; font-size: 0.88rem; cursor: pointer;
+    background: var(--bg); color: var(--text);
+    text-align: left; transition: all .15s; font-family: inherit;
+  }
+  .quiz-opt:hover:not([disabled]) { border-color: var(--green-light); background: var(--green-subtle); }
+  .quiz-opt.correct { border-color: var(--green-mid); background: var(--green-pale); color: var(--green-dark); font-weight: 600; }
+  .quiz-opt.wrong   { border-color: var(--red); background: var(--red-pale); color: var(--red); }
+  .quiz-feedback {
+    font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;
+    padding: 0.8rem 1rem; border-radius: 8px; background: var(--bg-soft);
+    border-left: 3px solid var(--green-light); display: none; margin-bottom: 1rem;
+  }
+  .quiz-nav { display: flex; justify-content: space-between; align-items: center; }
+  .quiz-counter { font-size: 0.78rem; color: #999; }
+  .btn-next {
+    padding: 0.55rem 1.2rem; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+    background: var(--green-mid); color: #fff; border: none; cursor: pointer;
+    transition: background .15s; font-family: inherit;
+  }
+  .btn-next:hover { background: var(--green-dark); }
+  .quiz-result { text-align: center; padding: 2rem 0; }
+  .quiz-result .score { font-size: 3.5rem; font-weight: 800; color: var(--green-mid); }
+  .quiz-result .msg { font-size: 0.95rem; color: var(--text-muted); margin: 0.5rem 0 1.5rem; line-height: 1.6; }
+  .btn-retry {
+    padding: 0.6rem 1.5rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+    background: none; color: var(--green-mid); border: 2px solid var(--green-mid);
+    cursor: pointer; transition: all .15s; font-family: inherit;
+  }
+  .btn-retry:hover { background: var(--green-pale); }
+
+  /* ── Action tips ── */
+  .tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .tip-card {
+    background: #fff; border-radius: 12px; padding: 1.3rem 1.2rem;
+    box-shadow: var(--card-shadow);
+    border-top: 3px solid var(--green-light);
+  }
+  .tip-num { font-size: 0.65rem; font-weight: 700; color: var(--green-light); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .tip-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+  .tip-body { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+  .callout {
+    background: var(--green-pale); border-radius: 12px;
+    padding: 1.2rem 1.4rem; border: 1.5px solid #C0DD97;
+    font-size: 0.88rem; color: var(--green-dark); line-height: 1.7;
+  }
+  .callout strong { color: var(--green-mid); }
+
+  /* ── Footer ── */
+  .site-footer {
+    text-align: center; padding: 2rem 1rem;
+    font-size: 0.72rem; color: #aaa; line-height: 1.7;
+    border-top: 1px solid var(--border);
+    background: #fff;
+  }
+
+  @media (max-width: 600px) {
+    .result-grid { grid-template-columns: 1fr 1fr; }
+    .calc-label { width: 100%; }
+    .bar-label { width: 90px; font-size: 0.72rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="eyebrow">End-Term Exhibition · Engaging With the Environment</div>
+  <h1>From Plate to Planet</h1>
+  <p class="subtitle">One-third of all food produced globally is lost or wasted. Explore what that means for your plate, your wallet, and the climate.</p>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('overview', this)">Overview</button>
+  <button class="tab-btn" onclick="showTab('causes', this)">Where it's lost</button>
+  <button class="tab-btn" onclick="showTab('impacts', this)">Impacts</button>
+  <button class="tab-btn" onclick="showTab('calculator', this)">Your footprint</button>
+  <button class="tab-btn" onclick="showTab('quiz', this)">Quiz</button>
+  <button class="tab-btn" onclick="showTab('action', this)">Take action</button>
+</nav>
+
+<main>
+
+<!-- ═══════ OVERVIEW ═══════ -->
+<section class="panel active container" id="tab-overview">
+  <div class="section-header">
+    <h2>The scale of the problem</h2>
+    <p>Food loss and waste is one of the greatest environmental and humanitarian challenges of our time — and it's largely invisible.</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="label">Food wasted yearly</div>
+      <div class="value">1.3B</div>
+      <div class="note">tonnes — FAO, 2011</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Share of all food produced</div>
+      <div class="value">33%</div>
+      <div class="note">lost or wasted globally</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">People it could feed</div>
+      <div class="value">2B+</div>
+      <div class="note">hungry people worldwide</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Annual economic cost</div>
+      <div class="value">$1T</div>
+      <div class="note">global economic loss</div>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <h3>Waste rate by food category (% of production lost or wasted globally)</h3>
+    <div id="bar-chart"></div>
+  </div>
+</section>
+
+<!-- ═══════ CAUSES ═══════ -->
+<section class="panel container" id="tab-causes">
+  <div class="section-header">
+    <h2>Where in the chain is food lost?</h2>
+    <p>Food loss and waste occurs at every step of the supply chain — from the farm through to your kitchen bin. The causes differ sharply between high- and low-income countries.</p>
+  </div>
+  <div class="timeline" id="chain-timeline"></div>
+  <p style="font-size:0.82rem;color:#999;margin-top:1.5rem;line-height:1.6;">
+    In high-income countries, over 40% of waste happens at retail and consumer level. In low-income countries, most losses occur at production and handling stages due to infrastructure gaps and climate vulnerability.
+  </p>
+</section>
+
+<!-- ═══════ IMPACTS ═══════ -->
+<section class="panel container" id="tab-impacts">
+  <div class="section-header">
+    <h2>Why it matters beyond your bin</h2>
+    <p>When food is wasted, everything used to produce it — land, water, energy, labour — is wasted too. The consequences ripple across climate, economy, and society.</p>
+  </div>
+  <div class="impact-grid" id="impact-grid"></div>
+</section>
+
+<!-- ═══════ CALCULATOR ═══════ -->
+<section class="panel container" id="tab-calculator">
+  <div class="section-header">
+    <h2>Your household food footprint</h2>
+    <p>Move the sliders to estimate how much food your household wastes — and what that costs the planet and your wallet.</p>
+  </div>
+  <div class="calc-wrap">
+    <div class="calc-row">
+      <span class="calc-label">Household size</span>
+      <input type="range" min="1" max="8" value="3" step="1" id="sl-hh" oninput="calcUpdate()">
+      <span class="calc-val" id="v-hh">3 people</span>
+    </div>
+    <div class="calc-row">
+      <span class="calc-label">Vegetables & fruits wasted</span>
+      <input type="range" min="0" max="5" value="1" step="0.5" id="sl-veg" oninput="calcUpdate()">
+      <span class="calc-val" id="v-veg">1.0 kg/wk</span>
+    </div>
+    <div class="calc-row">
+      <span class="calc-label">Cooked food discarded</span>
+      <input type="range" min="0" max="5" value="0.5" step="0.5" id="sl-cooked" oninput="calcUpdate()">
+      <span class="calc-val" id="v-cooked">0.5 kg/wk</span>
+    </div>
+    <div class="calc-row">
+      <span class="calc-label">Bread & grains wasted</span>
+      <input type="range" min="0" max="3" value="0.5" step="0.5" id="sl-bread" oninput="calcUpdate()">
+      <span class="calc-val" id="v-bread">0.5 kg/wk</span>
+    </div>
+    <div class="result-box" id="calc-results"></div>
+  </div>
+</section>
+
+<!-- ═══════ QUIZ ═══════ -->
+<section class="panel container" id="tab-quiz">
+  <div class="section-header">
+    <h2>Test your knowledge</h2>
+    <p>Five questions on food waste — how well do you know your food facts?</p>
+  </div>
+  <div class="quiz-wrap">
+    <div class="quiz-progress" id="quiz-progress"></div>
+    <div id="quiz-body"></div>
+  </div>
+</section>
+
+<!-- ═══════ ACTION ═══════ -->
+<section class="panel container" id="tab-action">
+  <div class="section-header">
+    <h2>What can you do today?</h2>
+    <p>Reducing food waste is one of the highest-impact climate actions available to individuals. Small daily habits compound into big results.</p>
+  </div>
+  <div class="tips-grid" id="action-tips"></div>
+  <div class="callout">
+    Reducing household food waste by just <strong>50%</strong> could save the average Indian family <strong>₹12,000–18,000 per year</strong>, while cutting the carbon equivalent of taking a car off the road for several weeks. Food waste reduction ranks in the <strong>top 10 climate solutions</strong> globally according to Project Drawdown.
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  Sources: FAO Global Food Losses Report (2011) · UNEP Food Waste Index (2021) · WRI Creating a Sustainable Food Future (2019) · IPCC Climate Change and Land (2022) · Project Drawdown<br>
+  Created for the End-Term Exhibition · Engaging With the Environment · March 2026
+</footer>
+
+<script>
+// ── Tab navigation ──────────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Bar chart ───────────────────────────────────────────────────────
+const barData = [
+  { label: 'Fruits & vegetables', pct: 45, color: '#639922' },
+  { label: 'Roots & tubers',      pct: 45, color: '#854F0B' },
+  { label: 'Fish & seafood',      pct: 35, color: '#185FA5' },
+  { label: 'Cereals',             pct: 30, color: '#BA7517' },
+  { label: 'Oilseeds & pulses',   pct: 22, color: '#993C1D' },
+  { label: 'Meat',                pct: 20, color: '#712B13' },
+  { label: 'Dairy',               pct: 17, color: '#534AB7' },
+];
+const bc = document.getElementById('bar-chart');
+barData.forEach(d => {
+  bc.innerHTML += `
+    <div class="bar-row">
+      <span class="bar-label">${d.label}</span>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:0%;background:${d.color};" data-pct="${d.pct}">
+          <span class="bar-pct">${d.pct}%</span>
+        </div>
+      </div>
+    </div>`;
+});
+// Animate bars on load
+requestAnimationFrame(() => {
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(el => {
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 200);
+});
+
+// ── Supply chain timeline ────────────────────────────────────────────
+const chain = [
+  {
+    stage: 'Agricultural production', pct: '14%', badge: 'pill-green',
+    note: 'Crops left in fields due to labour shortages, overproduction, or market price collapse. Livestock losses from disease and climate stress.'
+  },
+  {
+    stage: 'Post-harvest handling & storage', pct: '11%', badge: 'pill-green',
+    note: 'Inadequate cold-chain infrastructure, pest damage, and temperature mismanagement during aggregation and transport — especially acute in tropical climates.'
+  },
+  {
+    stage: 'Processing & packaging', pct: '9%', badge: 'pill-green',
+    note: 'Trimming out imperfect produce, grading losses, processing inefficiencies, and spillage on factory floors.'
+  },
+  {
+    stage: 'Distribution & retail', pct: '11%', badge: 'pill-amber',
+    note: 'Overstocking, cosmetic rejection of "ugly" produce, misinterpretation of best-before dates, and unsold stock discarded at store level.'
+  },
+  {
+    stage: 'Household consumption', pct: '28%', badge: 'pill-red',
+    note: 'The largest share in high-income countries. Over-purchasing, poor meal planning, cooking too much, and confusion over expiry labels are the main drivers.'
+  },
+];
+const tl = document.getElementById('chain-timeline');
+chain.forEach(c => {
+  tl.innerHTML += `
+    <div class="tl-item">
+      <div class="tl-dot ${c.badge === 'pill-red' || c.badge === 'pill-amber' ? 'highlight' : ''}"></div>
+      <div class="tl-head">
+        ${c.stage}
+        <span class="pill ${c.badge}">${c.pct} of total waste</span>
+      </div>
+      <div class="tl-body">${c.note}</div>
+    </div>`;
+});
+
+// ── Impacts ─────────────────────────────────────────────────────────
+const impacts = [
+  { icon: '🌍', title: 'Greenhouse gas emissions', desc: 'If food waste were a country, it would be the third-largest emitter of GHGs on Earth — responsible for 8–10% of global emissions annually.' },
+  { icon: '💧', title: 'Freshwater depletion',    desc: '250 km³ of water is used to produce food that is never eaten — equivalent to three times the volume of Lake Geneva, every single year.' },
+  { icon: '🌱', title: 'Land degradation',         desc: '1.4 billion hectares of land — 28% of total agricultural area globally — is used to grow food that eventually ends up as waste.' },
+  { icon: '💰', title: 'Economic loss',            desc: 'Households in India lose ₹50,000 crore worth of food every year. Global economic losses exceed $1 trillion annually.' },
+  { icon: '🏙️', title: 'Landfill methane',         desc: 'Organic waste buried in landfills decomposes anaerobically, producing methane — a gas 80× more potent than CO₂ over a 20-year period.' },
+  { icon: '🍽️', title: 'Food insecurity paradox',  desc: '828 million people face hunger globally. Recovering just 25% of wasted food would be enough to feed every undernourished person on Earth.' },
+];
+const ig = document.getElementById('impact-grid');
+impacts.forEach(i => {
+  ig.innerHTML += `
+    <div class="impact-card">
+      <div class="impact-icon">${i.icon}</div>
+      <div class="impact-title">${i.title}</div>
+      <div class="impact-desc">${i.desc}</div>
+    </div>`;
+});
+
+// ── Calculator ───────────────────────────────────────────────────────
+function calcUpdate() {
+  const hh     = parseInt(document.getElementById('sl-hh').value);
+  const veg    = parseFloat(document.getElementById('sl-veg').value);
+  const cooked = parseFloat(document.getElementById('sl-cooked').value);
+  const bread  = parseFloat(document.getElementById('sl-bread').value);
+
+  document.getElementById('v-hh').textContent     = hh + ' people';
+  document.getElementById('v-veg').textContent    = veg.toFixed(1) + ' kg/wk';
+  document.getElementById('v-cooked').textContent = cooked.toFixed(1) + ' kg/wk';
+  document.getElementById('v-bread').textContent  = bread.toFixed(1) + ' kg/wk';
+
+  const weeklyKg = veg + cooked + bread;
+  const yearlyKg = Math.round(weeklyKg * 52);
+  const co2      = Math.round(weeklyKg * 52 * 2.5);
+  const water    = Math.round(weeklyKg * 52 * 170);
+  const cost     = Math.round(weeklyKg * 52 * 120);
+
+  document.getElementById('calc-results').innerHTML = `
+    <h3>Your estimated annual footprint</h3>
+    <div class="result-grid">
+      <div class="result-metric">
+        <div class="rm-label">Food wasted</div>
+        <div class="rm-value">${yearlyKg}<span class="rm-unit"> kg/yr</span></div>
+      </div>
+      <div class="result-metric">
+        <div class="rm-label">CO₂ equivalent</div>
+        <div class="rm-value">${co2}<span class="rm-unit"> kg CO₂e</span></div>
+      </div>
+      <div class="result-metric">
+        <div class="rm-label">Water wasted</div>
+        <div class="rm-value">${water.toLocaleString()}<span class="rm-unit"> L</span></div>
+      </div>
+      <div class="result-metric">
+        <div class="rm-label">Money lost (est.)</div>
+        <div class="rm-value">₹${cost.toLocaleString()}</div>
+      </div>
+    </div>
+    <p class="result-note">Estimates use average emission factors and Indian household food costs. Actual values vary by diet and region.</p>
+  `;
+}
+calcUpdate();
+
+// ── Quiz ─────────────────────────────────────────────────────────────
+const questions = [
+  {
+    q: 'What fraction of all food produced globally is lost or wasted each year?',
+    opts: ['About 1 in 10', 'About 1 in 4', 'About 1 in 3', 'About 1 in 2'],
+    ans: 2,
+    exp: 'About one-third (33%) of all food — roughly 1.3 billion tonnes — is lost or wasted globally every year. This is enough to feed every hungry person on Earth more than twice over.'
+  },
+  {
+    q: 'Which stage causes the largest share of food waste in high-income countries?',
+    opts: ['Agricultural production', 'Processing & packaging', 'Retail & distribution', 'Household consumption'],
+    ans: 3,
+    exp: 'In wealthy nations, households are responsible for the largest share — up to 28–40% of all food waste. Over-purchasing and poor meal planning are the main culprits.'
+  },
+  {
+    q: 'Food waste rotting in landfills primarily releases which greenhouse gas?',
+    opts: ['Carbon dioxide (CO₂)', 'Nitrous oxide (N₂O)', 'Methane (CH₄)', 'Ozone (O₃)'],
+    ans: 2,
+    exp: 'Organic matter decomposes without oxygen in landfills and produces methane — roughly 80× more potent than CO₂ over a 20-year period. This is why composting matters so much.'
+  },
+  {
+    q: 'What share of global greenhouse gas emissions is caused by food loss and waste?',
+    opts: ['About 2–3%', 'About 8–10%', 'About 15–18%', 'More than 25%'],
+    ans: 1,
+    exp: 'Food loss and waste accounts for 8–10% of global GHG emissions. If it were a country, it would be the world\'s third-largest emitter — behind only the USA and China.'
+  },
+  {
+    q: 'Which food type has the highest global waste rate by percentage of production?',
+    opts: ['Meat products', 'Cereals & grains', 'Fruits & vegetables', 'Dairy products'],
+    ans: 2,
+    exp: 'Fruits and vegetables have the highest waste rate (~45%) due to their perishable nature, sensitivity to handling, and cosmetic rejection at retail. Roots and tubers are equally high at ~45%.'
+  },
+];
+
+let currentQ = 0, score = 0, answered = false;
+
+function renderProgress() {
+  const prog = document.getElementById('quiz-progress');
+  prog.innerHTML = questions.map((_, i) =>
+    `<div class="qp-dot ${i < currentQ ? 'done' : i === currentQ ? 'current' : ''}"></div>`
+  ).join('');
+}
+
+function renderQuiz() {
+  renderProgress();
+  const q = questions[currentQ];
+  const isLast = currentQ === questions.length - 1;
+  document.getElementById('quiz-body').innerHTML = `
+    <div class="quiz-q">Q${currentQ + 1}. ${q.q}</div>
+    <div class="quiz-opts">
+      ${q.opts.map((o, i) => `<button class="quiz-opt" onclick="answerQ(${i})">${o}</button>`).join('')}
+    </div>
+    <div class="quiz-feedback" id="qfb">${q.exp}</div>
+    <div class="quiz-nav">
+      <span class="quiz-counter">Question ${currentQ + 1} of ${questions.length} · Score: ${score}</span>
+      <button class="btn-next" onclick="${isLast ? 'showResult()' : 'nextQ()'}">${isLast ? 'See results →' : 'Next →'}</button>
+    </div>`;
+  answered = false;
+}
+
+function answerQ(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(b => b.disabled = true);
+  opts[i].classList.add(i === q.ans ? 'correct' : 'wrong');
+  opts[q.ans].classList.add('correct');
+  if (i === q.ans) score++;
+  document.getElementById('qfb').style.display = 'block';
+}
+
+function nextQ() { currentQ++; renderQuiz(); }
+
+function showResult() {
+  renderProgress();
+  const pct = Math.round((score / questions.length) * 100);
+  const msg = pct >= 80
+    ? 'Excellent — you really know your food waste facts!'
+    : pct >= 60
+      ? 'Good effort! A little more reading and you\'ll be an expert.'
+      : 'Keep exploring — this exhibition will help fill the gaps!';
+  document.getElementById('quiz-body').innerHTML = `
+    <div class="quiz-result">
+      <div class="score">${score}/${questions.length}</div>
+      <div class="msg">${msg}</div>
+      <button class="btn-retry" onclick="currentQ=0;score=0;renderQuiz();">Try again</button>
+    </div>`;
+}
+
+renderQuiz();
+
+// ── Action tips ──────────────────────────────────────────────────────
+const tips = [
+  { title: 'Plan your meals for the week',        body: 'Write a weekly menu before grocery shopping. Meal planners waste 20–25% less food than unplanned shoppers, saving money and time.' },
+  { title: 'First in, first out (FIFO)',           body: 'Arrange your fridge and pantry so older items sit at the front. This prevents the "buried and forgotten" problem — the most common cause of home spoilage.' },
+  { title: 'Understand best-before vs use-by',    body: '"Best before" indicates quality, not safety. Most dry goods, dairy, and even some meats are safe past that date — trust your senses, not the label.' },
+  { title: 'Designate a "leftovers night"',        body: 'One meal a week built around what\'s already in the fridge can cut food waste by up to 30% and saves cooking time too.' },
+  { title: 'Compost what you can\'t save',         body: 'Composting returns nutrients to soil instead of producing landfill methane. Even a small bin on a balcony works — and many cities offer free pickup.' },
+  { title: 'Buy imperfect produce',                body: 'Up to 20% of fruits and vegetables are rejected cosmetically before reaching shelves. Choosing oddly shaped produce sends a market signal and reduces farm-level waste.' },
+];
+const at = document.getElementById('action-tips');
+tips.forEach((t, i) => {
+  at.innerHTML += `
+    <div class="tip-card">
+      <div class="tip-num">Tip ${i + 1}</div>
+      <div class="tip-title">${t.title}</div>
+      <div class="tip-body">${t.body}</div>
+    </div>`;
+});
+</script>
+</body>
+</html>
